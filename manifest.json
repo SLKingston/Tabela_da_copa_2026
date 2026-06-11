@@ -1,0 +1,18 @@
+{
+  "name": "Simulador Copa 2026",
+  "short_name": "Copa 2026",
+  "description": "Acompanhe e simule os resultados da Copa do Mundo 2026",
+  "start_url": "./Copa_2026.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#1e3a8a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/5258/5258287.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
