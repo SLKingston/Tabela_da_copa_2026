@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Oficial Copa 2026 - 48 Seleções</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --accent: #2563eb;
+            --secondary: #16a34a;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding-bottom: 90px;
+            /* Evita seleção de texto acidental e toques fantasmas */
+            touch-action: manipulation;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 15px 10px;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .nav-tabs {
+            display: flex;
+            overflow-x: auto;
+            background: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            scrollbar-width: none;
+        }
+        .nav-tabs::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            flex: 0 0 auto;
+            padding: 15px 18px;
+            border: none;
+            background: none;
+            font-weight: bold;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .container {
+            padding: 10px;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 20px 0 8px 5px;
+            color: var(--primary);
+            border-left: 5px solid var(--accent);
+            padding-left: 8px;
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            border: 1px solid #e2e8f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th { color: #64748b; padding: 8px 4px; border-bottom: 2px solid #e2e8f0; text-align: left; }
+        th.center, td.center { text-align: center; }
+        td { padding: 10px 4px; border-bottom: 1px solid #f1f5f9; }
+
+        .col-p { font-weight: bold; color: var(--primary); }
+
+        .match-card {
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .match-card:last-child { border-bottom: none; }
+
+        .team { display: flex; align-items: center; gap: 8px; width: 42%; font-size: 0.82rem; }
+        .team.right { justify-content: flex-end; text-align: right; }
+        .flag { font-size: 1.4rem; line-height: 1; display: inline-block; vertical-align: middle; }
+        .team-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .score-input {
+            width: 38px;
+            height: 32px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background: #fafafa;
+        }
+
+        .vs { font-weight: bold; color: #94a3b8; font-size: 0.7rem; }
+
+        .action-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: white;
+            padding: 12px 15px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 99;
+        }
+        .btn-save {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            box-shadow: 0 4px 6px rgba(22, 163, 74, 0.2);
+        }
+        .btn-reset {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            max-width: 120px;
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+        }
+        
+        .qualified { background-color: #f0fdf4; }
+        .qualified td { border-bottom: 1px solid #bbf7d0; }
+    </style>
+</head>
+<body>
+
+    <header>🏆 TABELA INTERATIVA COMPLETA COPA 2026</header>
+
+    <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('classificacao')">Pontos Grupos</button>
+        <button class="tab-btn" onclick="switchTab('jogos-grupos')">Jogos Grupos</button>
+        <button class="tab-btn" onclick="switchTab('eliminatorias')">Mata-Mata (Chave 2026)</button>
+    </nav>
+
+    <div class="container">
+        
+        <div id="classificacao" class="page active">
+            <div id="div-tabelas"></div>
+        </div>
+
+        <div id="jogos-grupos" class="page">
+            <div id="div-jogos"></div>
+        </div>
+
+        <div id="eliminatorias" class="page">
+            <div class="section-title">Dezesseis-avos de Final (Rodada de 32)</div>
+            <div style="font-size: 0.75rem; color:#64748b; margin-bottom: 10px; padding-left: 5px;">
+                * Avançam para esta fase os 2 primeiros de cada grupo + os 8 melhores terceiros colocados.
+            </div>
+            
+            <div class="table-container" id="container-16avos">
+                </div>
+
+            <div class="section-title">Oitavas de Final</div>
+            <div class="table-container" id="container-oitavas">
+                </div>
+
+            <div class="section-title">Quartas de Final</div>
+            <div class="table-container" id="container-quartas">
+                </div>
+
+            <div class="section-title">Semifinais</div>
+            <div class="table-container" id="container-semis">
+                </div>
+
+            <div class="section-title">Grande Final</div>
+            <div class="table-container" style="border: 2px solid #dc2626;">
+                <div class="match-card">
+                    <div class="team" id="fin_v1"><span class="flag">❓</span> <span class="team-name">Finalista 1</span></div>
+                    <input type="number" class="score-input" id="f_j1_1"> <span class="vs">X</span> <input type="number" class="score-input" id="f_j1_2">
+                    <div class="team right" id="fin_v2"><span class="team-name">Finalista 2</span> <span class="flag">❓</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="action-bar">
+        <button class="btn-save" onclick="saveScores()">💾 Salvar Dados no Meu Celular</button>
+        <button class="btn-reset" onclick="resetScores()">🔄 Resetar</button>
+    </div>
+
+    <script>
+        // Registro do Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log("App Pronto para uso Offline"))
+                .catch(err => console.log("Erro SW:", err));
+        }
+
+        const gruposData = {
+            "A": { nome: "GRUPO A", times: ["México", "África do Sul", "Coreia do Sul", "República Tcheca"], flags: ["🇲🇽","🇿🇦","🇰🇷","🇨🇿"] },
+            "B": { nome: "GRUPO B", times: ["Canadá", "Bósnia e Herzegovina", "Qatar", "Suíça"], flags: ["🇨🇦","🇧🇦","🇶🇦","🇨🇭"] },
+            "C": { nome: "GRUPO C", times: ["Brasil", "Marrocos", "Haiti", "Escócia"], flags: ["🇧🇷","🇲🇦","🇭🇹","🏴󠁧󠁢󠁳󠁣󠁴󠁿"] },
+            "D": { nome: "GRUPO D", times: ["Estados Unidos", "Paraguai", "Austrália", "Turquia"], flags: ["🇺🇸","🇵🇾","🇦🇺","🇹🇷"] },
+            "E": { nome: "GRUPO E", times: ["Alemanha", "Curaçao", "Costa do Marfim", "Equador"], flags: ["🇩🇪","🇨🇼","🇨🇮","🇪🇨"] },
+            "F": { nome: "GRUPO F", times: ["Holanda", "Japão", "Suécia", "Tunísia"], flags: ["🇳🇱","🇯🇵","🇸🇪","🇹🇳"] },
+            "G": { nome: "GRUPO G", times: ["Bélgica", "Egito", "Irã", "Nova Zelândia"], flags: ["🇧🇪","🇪🇬","🇮🇷","🇳🇿"] },
+            "H": { nome: "GRUPO H", times: ["Espanha", "Cabo Verde", "Arábia Saudita", "Uruguai"], flags: ["🇪🇸","🇨🇻","🇸🇦","🇺🇾"] },
+            "I": { nome: "GRUPO I", times: ["França", "Senegal", "Iraque", "Noruega"], flags: ["🇫🇷","🇸🇳","🇮🇶","🇳🇴"] },
+            "J": { nome: "GRUPO J", times: ["Argentina", "Argélia", "Áustria", "Jordânia"], flags: ["🇦🇷","🇩🇿","🇦🇹","🇯🇴"] },
+            "K": { nome: "GRUPO K", times: ["Portugal", "RD Congo", "Uzbequistão", "Colômbia"], flags: ["🇵🇹","🇨🇩","🇺🇿","🇨🇴"] },
+            "L": { nome: "GRUPO L", times: ["Inglaterra", "Croácia", "Gana", "Panamá"], flags: ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇭🇷","🇬🇭","🇵🇦"] }
+        };
+
+        const flagsMap = {};
+        Object.keys(gruposData).forEach(g => {
+            gruposData[g].times.forEach((t, i) => { flagsMap[t] = gruposData[g].flags[i]; });
+        });
+
+        const estruturaMataMata = [
+            // Ordenado conforme o diagrama oficial da FIFA (Jogos 49 a 64)
+            // Para que o vencedor de 1 e 2 se enfrentem, 3 e 4, etc.
+            { id: "d_j1", t1: "1A", t2: "3_3", label2: "3º (C/E/F/H/I)" }, // M49
+            { id: "d_j2", t1: "2A", t2: "2B" },                           // M50
+            { id: "d_j3", t1: "1B", t2: "3_7", label2: "3º (E/F/G/I/J)" }, // M51
+            { id: "d_j4", t1: "1C", t2: "2F" },                           // M52
+            { id: "d_j5", t1: "1E", t2: "3_1", label2: "3º (A/B/C/D/F)" }, // M53
+            { id: "d_j6", t1: "1F", t2: "2C" },                           // M54
+            { id: "d_j7", t1: "1G", t2: "3_6", label2: "3º (A/E/H/I/J)" }, // M55
+            { id: "d_j8", t1: "1H", t2: "2J" },                           // M56
+            { id: "d_j9", t1: "1I", t2: "3_2", label2: "3º (C/D/F/G/H)" }, // M57
+            { id: "d_j10", t1: "2E", t2: "2I" },                          // M58
+            { id: "d_j11", t1: "1J", t2: "2H" },                          // M59
+            { id: "d_j12", t1: "2K", t2: "2L" },                          // M60
+            { id: "d_j13", t1: "1D", t2: "3_5", label2: "3º (B/E/F/I/J)" }, // M61
+            { id: "d_j14", t1: "2D", t2: "2G" },                          // M62
+            { id: "d_j15", t1: "1L", t2: "3_4", label2: "3º (E/H/I/J/K)" }, // M63
+            { id: "d_j16", t1: "1K", t2: "3_8", label2: "3º (D/E/I/J/L)" }  // M64
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const containerTabelas = document.getElementById('div-tabelas');
+            const containerJogos = document.getElementById('div-jogos');
+
+            // Geração das Tabelas
+            Object.keys(gruposData).forEach(gKey => {
+                const grupo = gruposData[gKey];
+
+                let htmlTab = `
+                    <div class="section-title">${grupo.nome}</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Seleção</th><th class="center">P</th><th class="center">V</th><th class="center">SG</th></tr>
+                            </thead>
+                            <tbody id="tbody_${gKey}">`;
+                grupo.times.forEach((t) => {
+                    htmlTab += `
+                        <tr>
+                            <td><span class="flag">${flagsMap[t]}</span> ${t}</td>
+                            <td class="col-p center">0</td>
+                            <td class="center">0</td>
+                            <td class="center">0</td>
+                        </tr>`;
+                });
+                htmlTab += `</tbody></table></div>`;
+                containerTabelas.insertAdjacentHTML('beforeend', htmlTab);
+
+                let htmlJogos = `<div class="section-title">Jogos - ${grupo.nome}</div><div class="table-container">`;
+                const combinacoes = [[0,1], [2,3], [0,2], [1,3], [3,0], [1,2]];
+                
+                combinacoes.forEach((c, idx) => {
+                    htmlJogos += `
+                        <div class="match-card">
+                            <div class="team"><span class="flag">${grupo.flags[c[0]]}</span> <span class="team-name">${grupo.times[c[0]]}</span></div>
+                            <input type="number" class="score-input" id="match_${gKey}_c${idx}_1" oninput="calcularPontos()" min="0">
+                            <span class="vs">X</span>
+                            <input type="number" class="score-input" id="match_${gKey}_c${idx}_2" oninput="calcularPontos()" min="0">
+                            <div class="team right"><span class="team-name">${grupo.times[c[1]]}</span> <span class="flag">${grupo.flags[c[1]]}</span></div>
+                        </div>`;
+                });
+                htmlJogos += `</div>`;
+                containerJogos.insertAdjacentHTML('beforeend', htmlJogos);
+            });
+
+            // Montagem dos nós do mata-mata
+            const c16 = document.getElementById('container-16avos');
+            estruturaMataMata.forEach(partida => {
+                // Função para gerar o rótulo descritivo automático ex: "1º A", "2º F"
+                function getLabel(t) { return t.includes('_') ? "Melhor 3º" : t.charAt(0) + "º " + t.substring(1); }
+                
+                let l1 = partida.label1 || getLabel(partida.t1);
+                let l2 = partida.label2 || getLabel(partida.t2);
+                
+                c16.insertAdjacentHTML('beforeend', `
+                    <div class="match-card">
+                        <div class="team" id="node_${partida.t1}"><span class="flag">❓</span> <span class="team-name">${l1}</span></div>
+                        <input type="number" class="score-input" id="${partida.id}_1" oninput="avancarMataMata()">
+                        <span class="vs">X</span>
+                        <input type="number" class="score-input" id="${partida.id}_2" oninput="avancarMataMata()">
+                        <div class="team right" id="node_${partida.t2}"><span class="team-name">${l2}</span> <span class="flag">❓</span></div>
+                    </div>
+                `);
+            });
+
+            const cOit = document.getElementById('container-oitavas');
+            for(let i=1; i<=8; i++) {
+                cOit.insertAdjacentHTML('beforeend', `
+                    <div class="match-card">
+                        <div class="team" id="oit_v${i*2-1}"><span class="flag">❓</span> <span class="team-name">Venc. 16-avos</span></div>
+                        <input type="number" class="score-input" id="o_j${i}_1" oninput="avancarMataMata()">
+                        <span class="vs">X</span>
+                        <input type="number" class="score-input" id="o_j${i}_2" oninput="avancarMataMata()">
+                        <div class="team right" id="oit_v${i*2}"><span class="team-name">Venc. 16-avos</span> <span class="flag">❓</span></div>
+                    </div>
+                `);
+            }
+
+            const cQua = document.getElementById('container-quartas');
+            for(let i=1; i<=4; i++) {
+                cQua.insertAdjacentHTML('beforeend', `
+                    <div class="match-card">
+                        <div class="team" id="qua_v${i*2-1}"><span class="flag">❓</span> <span class="team-name">Venc. Oitavas</span></div>
+                        <input type="number" class="score-input" id="q_j${i}_1" oninput="avancarMataMata()">
+                        <span class="vs">X</span>
+                        <input type="number" class="score-input" id="q_j${i}_2" oninput="avancarMataMata()">
+                        <div class="team right" id="qua_v${i*2}"><span class="team-name">Venc. Oitavas</span> <span class="flag">❓</span></div>
+                    </div>
+                `);
+            }
+
+            const cSem = document.getElementById('container-semis');
+            for(let i=1; i<=2; i++) {
+                cSem.insertAdjacentHTML('beforeend', `
+                    <div class="match-card">
+                        <div class="team" id="sem_v${i*2-1}"><span class="flag">❓</span> <span class="team-name">Venc. Quartas</span></div>
+                        <input type="number" class="score-input" id="s_j${i}_1" oninput="avancarMataMata()">
+                        <span class="vs">X</span>
+                        <input type="number" class="score-input" id="s_j${i}_2" oninput="avancarMataMata()">
+                        <div class="team right" id="sem_v${i*2}"><span class="team-name">Venc. Quartas</span> <span class="flag">❓</span></div>
+                    </div>
+                `);
+            }
+
+            loadScores();
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function setTeamDOM(elementId, teamObj) {
+            const el = document.getElementById(elementId);
+            if(!el) return;
+            const isRight = el.classList.contains('right');
+            if(isRight) {
+                el.innerHTML = `<span class="team-name">${teamObj.nome}</span> <span class="flag">${teamObj.flag}</span>`;
+            } else {
+                el.innerHTML = `<span class="flag">${teamObj.flag}</span> <span class="team-name">${teamObj.nome}</span>`;
+            }
+            el.dataset.teamName = teamObj.nome;
+            el.dataset.teamFlag = teamObj.flag;
+        }
+
+        function resetTeamDOM(elementId, placeholder) {
+            const el = document.getElementById(elementId);
+            if(!el) return;
+            const isRight = el.classList.contains('right');
+            if(isRight) {
+                el.innerHTML = `<span class="team-name">${placeholder}</span> <span class="flag">❓</span>`;
+            } else {
+                el.innerHTML = `<span class="flag">❓</span> <span class="team-name">${placeholder}</span>`;
+            }
+            delete el.dataset.teamName;
+            delete el.dataset.teamFlag;
+        }
+
+        function calcularPontos() {
+            let stats = {};
+            Object.keys(gruposData).forEach(gKey => {
+                gruposData[gKey].times.forEach(t => { stats[t] = { nome: t, pts: 0, vits: 0, sg: 0, flag: flagsMap[t], pj: 0 }; });
+            });
+
+            Object.keys(gruposData).forEach(gKey => {
+                const grupo = gruposData[gKey];
+                const combinacoes = [[0,1], [2,3], [0,2], [1,3], [3,0], [1,2]];
+
+                combinacoes.forEach((c, idx) => {
+                    const t1 = grupo.times[c[0]];
+                    const t2 = grupo.times[c[1]];
+                    const g1 = parseInt(document.getElementById(`match_${gKey}_c${idx}_1`).value);
+                    const g2 = parseInt(document.getElementById(`match_${gKey}_c${idx}_2`).value);
+
+                    if (!isNaN(g1) && !isNaN(g2)) {
+                        stats[t1].sg += (g1 - g2); stats[t2].sg += (g2 - g1);
+                        stats[t1].pj++; stats[t2].pj++;
+                        if (g1 > g2) { stats[t1].pts += 3; stats[t1].vits += 1; }
+                        else if (g2 > g1) { stats[t2].pts += 3; stats[t2].vits += 1; }
+                        else { stats[t1].pts += 1; stats[t2].pts += 1; }
+                    }
+                });
+            });
+
+            let todosTerceiros = [];
+            let allGroupsSorted = {};
+            
+            Object.keys(gruposData).forEach(gKey => {
+                let arrTimes = gruposData[gKey].times.map(t => stats[t]);
+                arrTimes.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.vits - a.vits);
+                allGroupsSorted[gKey] = arrTimes;
+                todosTerceiros.push(arrTimes[2]);
+            });
+
+            todosTerceiros.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.vits - a.vits);
+            let top8Nomes = todosTerceiros.slice(0, 8).map(t => t.nome);
+
+            Object.keys(gruposData).forEach(gKey => {
+                let arrTimes = allGroupsSorted[gKey];
+                const tbody = document.getElementById(`tbody_${gKey}`);
+                tbody.innerHTML = "";
+                
+                arrTimes.forEach((t, index) => {
+                    let qualificado = t.pj > 0 && (index < 2 || (index === 2 && top8Nomes.includes(t.nome)));
+                    let classeQualificado = qualificado ? 'class="qualified"' : '';
+                    tbody.insertAdjacentHTML('beforeend', `
+                        <tr ${classeQualificado}>
+                            <td><span class="flag">${t.flag}</span> ${t.nome}</td>
+                            <td class="col-p center">${t.pts}</td>
+                            <td class="center">${t.vits}</td>
+                            <td class="center">${t.sg}</td>
+                        </tr>
+                    `);
+                });
+
+                // Só exibe no mata-mata se houver jogos preenchidos no grupo
+                if (arrTimes.some(t => t.pj > 0)) {
+                    setTeamDOM(`node_1${gKey}`, arrTimes[0]);
+                    setTeamDOM(`node_2${gKey}`, arrTimes[1]);
+                } else {
+                    resetTeamDOM(`node_1${gKey}`, `1º ${gKey}`);
+                    resetTeamDOM(`node_2${gKey}`, `2º ${gKey}`);
+                }
+            });
+
+            // Distribui os 8 melhores terceiros colocados sequencialmente para os nós 3_1 até 3_8
+            for(let i=0; i<8; i++) {
+                if (todosTerceiros[i] && todosTerceiros[i].pj > 0) {
+                    setTeamDOM(`node_3_${i+1}`, todosTerceiros[i]);
+                } else {
+                    resetTeamDOM(`node_3_${i+1}`, "Melhor 3º");
+                }
+            }
+
+            avancarMataMata();
+        }
+
+        function avancarMataMata() {
+            const extrairVencedor = (idInput, idDom1, idDom2) => {
+                const g1 = parseInt(document.getElementById(`${idInput}_1`).value);
+                const g2 = parseInt(document.getElementById(`${idInput}_2`).value);
+                const t1 = document.getElementById(idDom1); 
+                const t2 = document.getElementById(idDom2);
+
+                if(!isNaN(g1) && !isNaN(g2) && t1 && t2 && t1.dataset.teamName && t2.dataset.teamName) {
+                    if(g1 > g2) return { nome: t1.dataset.teamName, flag: t1.dataset.teamFlag };
+                    return { nome: t2.dataset.teamName, flag: t2.dataset.teamFlag };
+                }
+                return null;
+            };
+
+            for(let i=1; i<=16; i++) {
+                let v = extrairVencedor(`d_j${i}`, `node_${estruturaMataMata[i-1].t1}`, `node_${estruturaMataMata[i-1].t2}`);
+                if(v) setTeamDOM(`oit_v${i}`, v);
+                else resetTeamDOM(`oit_v${i}`, "Venc. 16-avos");
+            }
+            
+            for(let i=1; i<=8; i++) {
+                let v = extrairVencedor(`o_j${i}`, `oit_v${i*2-1}`, `oit_v${i*2}`);
+                if(v) setTeamDOM(`qua_v${i}`, v);
+                else resetTeamDOM(`qua_v${i}`, "Venc. Oitavas");
+            }
+
+            for(let i=1; i<=4; i++) {
+                let v = extrairVencedor(`q_j${i}`, `qua_v${i*2-1}`, `qua_v${i*2}`);
+                if(v) setTeamDOM(`sem_v${i}`, v);
+                else resetTeamDOM(`sem_v${i}`, "Venc. Quartas");
+            }
+
+            for(let i=1; i<=2; i++) {
+                let v = extrairVencedor(`s_j${i}`, `sem_v${i*2-1}`, `sem_v${i*2}`);
+                if(v) setTeamDOM(`fin_v${i}`, v);
+                else resetTeamDOM(`fin_v${i}`, `Finalista ${i}`);
+            }
+        }
+
+        function resetScores() {
+            if (confirm("Tem certeza que deseja resetar todos os resultados da sua simulação?")) {
+                document.querySelectorAll('.score-input').forEach(input => {
+                    input.value = "";
+                    localStorage.removeItem('copa26_full_' + input.id);
+                });
+                calcularPontos();
+                alert('Simulação reiniciada!');
+            }
+        }
+
+        function saveScores() {
+            document.querySelectorAll('.score-input').forEach(input => {
+                if(input.value !== "") localStorage.setItem('copa26_full_' + input.id, input.value);
+                else localStorage.removeItem('copa26_full_' + input.id);
+            });
+            alert('Perfeito! Sua simulação com as 48 seleções foi salva.');
+        }
+
+        function loadScores() {
+            document.querySelectorAll('.score-input').forEach(input => {
+                const saved = localStorage.getItem('copa26_full_' + input.id);
+                if (saved !== null) input.value = saved;
+            });
+            calcularPontos();
+        }
+    </script>
+</body>
+</html>
