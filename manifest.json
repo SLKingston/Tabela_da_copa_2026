@@ -2,7 +2,7 @@
   "name": "Simulador Copa 2026",
   "short_name": "Copa 2026",
   "description": "Acompanhe e simule os resultados da Copa do Mundo 2026",
-  "start_url": "./Copa_2026.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#1e3a8a",
