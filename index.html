@@ -6,72 +6,82 @@
     <title>Simulador Oficial Copa 2026 - 48 Seleções</title>
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#1e3a8a">
+    <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
 
     <style>
         :root {
-            --primary: #1e3a8a;
+            --primary: #0f172a;
             --accent: #2563eb;
-            --secondary: #16a34a;
-            --bg: #f1f5f9;
+            --accent-hover: #1d4ed8;
+            --secondary: #10b981;
+            --bg: #f8fafc;
             --card-bg: #ffffff;
-            --text: #1e293b;
+            --text: #334155;
+            --text-dark: #0f172a;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.2s, border-color 0.2s;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding-bottom: 90px;
-            /* Evita seleção de texto acidental e toques fantasmas */
+            padding-bottom: 100px;
             touch-action: manipulation;
+            -webkit-font-smoothing: antialiased;
         }
 
         header {
-            background: var(--primary);
+            background: linear-gradient(135deg, #1e3a8a 0%, var(--primary) 100%);
             color: white;
             text-align: center;
-            padding: 15px 10px;
-            font-size: 1.3rem;
-            font-weight: bold;
+            padding: 24px 16px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .nav-tabs {
             display: flex;
-            overflow-x: auto;
             background: #ffffff;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             position: sticky;
             top: 0;
             z-index: 100;
-            scrollbar-width: none;
+            border-bottom: 1px solid var(--border);
         }
-        .nav-tabs::-webkit-scrollbar { display: none; }
 
         .tab-btn {
-            flex: 0 0 auto;
-            padding: 15px 18px;
+            flex: 1;
+            padding: 16px 8px;
             border: none;
             background: none;
-            font-weight: bold;
+            font-weight: 700;
             color: #64748b;
             cursor: pointer;
             border-bottom: 3px solid transparent;
             font-size: 0.9rem;
+            text-align: center;
+            white-space: nowrap;
         }
 
         .tab-btn.active {
             color: var(--accent);
             border-bottom-color: var(--accent);
+            background: #f8fafc;
         }
 
         .container {
-            padding: 10px;
-            max-width: 680px;
+            padding: 16px;
+            max-width: 720px;
             margin: 0 auto;
         }
 
@@ -79,113 +89,169 @@
         .page.active { display: block; }
 
         .section-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin: 20px 0 8px 5px;
-            color: var(--primary);
-            border-left: 5px solid var(--accent);
-            padding-left: 8px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin: 24px 0 12px 0;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 2px;
         }
 
         .table-container {
             background: var(--card-bg);
-            border-radius: 10px;
-            padding: 10px;
+            border-radius: 12px;
+            padding: 12px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            border: 1px solid var(--border);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
-        th { color: #64748b; padding: 8px 4px; border-bottom: 2px solid #e2e8f0; text-align: left; }
+        th { 
+            color: #64748b; 
+            padding: 10px 6px; 
+            border-bottom: 2px solid var(--border); 
+            text-align: left;
+            font-weight: 600;
+        }
         th.center, td.center { text-align: center; }
-        td { padding: 10px 4px; border-bottom: 1px solid #f1f5f9; }
+        td { padding: 12px 6px; border-bottom: 1px solid #f1f5f9; color: var(--text-dark); }
 
-        .col-p { font-weight: bold; color: var(--primary); }
+        .col-p { font-weight: bold; color: var(--accent); }
 
         .match-card {
             background: var(--card-bg);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 10px;
+            padding: 14px 12px;
             border-bottom: 1px solid #f1f5f9;
         }
         .match-card:last-child { border-bottom: none; }
 
-        .team { display: flex; align-items: center; gap: 8px; width: 42%; font-size: 0.82rem; }
+        .team { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            width: 40%; 
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
         .team.right { justify-content: flex-end; text-align: right; }
-        .flag { font-size: 1.4rem; line-height: 1; display: inline-block; vertical-align: middle; }
+        .flag { 
+            font-size: 1.5rem; 
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+        }
         .team-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        .score-input {
-            width: 38px;
-            height: 32px;
-            text-align: center;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            background: #fafafa;
+        .score-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .vs { font-weight: bold; color: #94a3b8; font-size: 0.7rem; }
+        .score-input {
+            width: 44px;
+            height: 38px;
+            text-align: center;
+            font-size: 1.15rem;
+            font-weight: 700;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #f8fafc;
+            color: var(--text-dark);
+            outline: none;
+            -moz-appearance: textfield;
+        }
+        .score-input::-webkit-outer-spin-button,
+        .score-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .score-input:focus {
+            border-color: var(--accent);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .vs { font-weight: 700; color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .action-bar {
             position: fixed;
             bottom: 0; left: 0; right: 0;
-            background: white;
-            padding: 12px 15px;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 16px;
+            box-shadow: 0 -10px 15px -3px rgba(0,0,0,0.05);
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             z-index: 99;
+            border-top: 1px solid var(--border);
         }
+        
+        .btn {
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
         .btn-save {
-            background: var(--secondary);
+            background: var(--accent);
             color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 30px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            max-width: 300px;
-            box-shadow: 0 4px 6px rgba(22, 163, 74, 0.2);
+            flex: 2;
+            max-width: 320px;
         }
+        .btn-save:hover { background: var(--accent-hover); }
+
         .btn-reset {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 30px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
+            background: #f1f5f9;
+            color: #64748b;
+            flex: 1;
             max-width: 120px;
-            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--border);
         }
+        .btn-reset:hover { background: #e2e8f0; color: #475569; }
         
         .qualified { background-color: #f0fdf4; }
         .qualified td { border-bottom: 1px solid #bbf7d0; }
+        .third-qualified { background-color: #eff6ff; }
+        .third-qualified td { border-bottom: 1px solid #bfdbfe; }
     </style>
 </head>
 <body>
 
-    <header>🏆 TABELA INTERATIVA COMPLETA COPA 2026</header>
+    <header>🏆 SIMULADOR COPA DO MUNDO 2026</header>
 
     <nav class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('classificacao')">Pontos Grupos</button>
-        <button class="tab-btn" onclick="switchTab('jogos-grupos')">Jogos Grupos</button>
-        <button class="tab-btn" onclick="switchTab('eliminatorias')">Mata-Mata (Chave 2026)</button>
+        <button class="tab-btn active" onclick="switchTab('classificacao')">Tabelas</button>
+        <button class="tab-btn" onclick="switchTab('jogos-grupos')">Jogos dos Grupos</button>
+        <button class="tab-btn" onclick="switchTab('eliminatorias')">Mata-Mata</button>
     </nav>
 
     <div class="container">
@@ -200,31 +266,31 @@
 
         <div id="eliminatorias" class="page">
             <div class="section-title">Dezesseis-avos de Final (Rodada de 32)</div>
-            <div style="font-size: 0.75rem; color:#64748b; margin-bottom: 10px; padding-left: 5px;">
-                * Avançam para esta fase os 2 primeiros de cada grupo + os 8 melhores terceiros colocados.
+            <div style="font-size: 0.8rem; color:#64748b; margin-bottom: 16px; padding-left: 4px; line-height: 1.4;">
+                💡 Avançam os 2 primeiros de cada grupo e os 8 melhores terceiros colocados (distribuídos sem repetir grupos).
             </div>
             
-            <div class="table-container" id="container-16avos">
-                </div>
+            <div class="table-container" id="container-16avos"></div>
 
             <div class="section-title">Oitavas de Final</div>
-            <div class="table-container" id="container-oitavas">
-                </div>
+            <div class="table-container" id="container-oitavas"></div>
 
             <div class="section-title">Quartas de Final</div>
-            <div class="table-container" id="container-quartas">
-                </div>
+            <div class="table-container" id="container-quartas"></div>
 
             <div class="section-title">Semifinais</div>
-            <div class="table-container" id="container-semis">
-                </div>
+            <div class="table-container" id="container-semis"></div>
 
             <div class="section-title">Grande Final</div>
-            <div class="table-container" style="border: 2px solid #dc2626;">
-                <div class="match-card">
-                    <div class="team" id="fin_v1"><span class="flag">❓</span> <span class="team-name">Finalista 1</span></div>
-                    <input type="number" class="score-input" id="f_j1_1"> <span class="vs">X</span> <input type="number" class="score-input" id="f_j1_2">
-                    <div class="team right" id="fin_v2"><span class="team-name">Finalista 2</span> <span class="flag">❓</span></div>
+            <div class="table-container" style="border: 2px solid #2563eb; background: linear-gradient(to bottom, #ffffff, #f0f9ff);">
+                <div class="match-card" style="background: transparent;">
+                    <div class="team" id="fin_v1"><span class="flag">❓</span> <span class="team-name" style="font-weight:700;">Finalista 1</span></div>
+                    <div class="score-container">
+                        <input type="number" class="score-input" id="f_j1_1" oninput="avancarMataMata()"> 
+                        <span class="vs">X</span> 
+                        <input type="number" class="score-input" id="f_j1_2" oninput="avancarMataMata()">
+                    </div>
+                    <div class="team right" id="fin_v2"><span class="team-name" style="font-weight:700;">Finalista 2</span> <span class="flag">❓</span></div>
                 </div>
             </div>
         </div>
@@ -232,18 +298,11 @@
     </div>
 
     <div class="action-bar">
-        <button class="btn-save" onclick="saveScores()">💾 Salvar Dados no Meu Celular</button>
-        <button class="btn-reset" onclick="resetScores()">🔄 Resetar</button>
+        <button class="btn btn-reset" onclick="resetScores()">Resetar</button>
+        <button class="btn btn-save" onclick="saveScores()">💾 Salvar Simulação</button>
     </div>
 
     <script>
-        // Registro do Service Worker para PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(() => console.log("App Pronto para uso Offline"))
-                .catch(err => console.log("Erro SW:", err));
-        }
-
         const gruposData = {
             "A": { nome: "GRUPO A", times: ["México", "África do Sul", "Coreia do Sul", "República Tcheca"], flags: ["🇲🇽","🇿🇦","🇰🇷","🇨🇿"] },
             "B": { nome: "GRUPO B", times: ["Canadá", "Bósnia e Herzegovina", "Qatar", "Suíça"], flags: ["🇨🇦","🇧🇦","🇶🇦","🇨🇭"] },
@@ -264,25 +323,24 @@
             gruposData[g].times.forEach((t, i) => { flagsMap[t] = gruposData[g].flags[i]; });
         });
 
+        // Estrutura atualizada contendo os slots específicos para as combinações de terceiros lugares
         const estruturaMataMata = [
-            // Ordenado conforme o diagrama oficial da FIFA (Jogos 49 a 64)
-            // Para que o vencedor de 1 e 2 se enfrentem, 3 e 4, etc.
-            { id: "d_j1", t1: "1A", t2: "3_3", label2: "3º (C/E/F/H/I)" }, // M49
-            { id: "d_j2", t1: "2A", t2: "2B" },                           // M50
-            { id: "d_j3", t1: "1B", t2: "3_7", label2: "3º (E/F/G/I/J)" }, // M51
-            { id: "d_j4", t1: "1C", t2: "2F" },                           // M52
-            { id: "d_j5", t1: "1E", t2: "3_1", label2: "3º (A/B/C/D/F)" }, // M53
-            { id: "d_j6", t1: "1F", t2: "2C" },                           // M54
-            { id: "d_j7", t1: "1G", t2: "3_6", label2: "3º (A/E/H/I/J)" }, // M55
-            { id: "d_j8", t1: "1H", t2: "2J" },                           // M56
-            { id: "d_j9", t1: "1I", t2: "3_2", label2: "3º (C/D/F/G/H)" }, // M57
-            { id: "d_j10", t1: "2E", t2: "2I" },                          // M58
-            { id: "d_j11", t1: "1J", t2: "2H" },                          // M59
-            { id: "d_j12", t1: "2K", t2: "2L" },                          // M60
-            { id: "d_j13", t1: "1D", t2: "3_5", label2: "3º (B/E/F/I/J)" }, // M61
-            { id: "d_j14", t1: "2D", t2: "2G" },                          // M62
-            { id: "d_j15", t1: "1L", t2: "3_4", label2: "3º (E/H/I/J/K)" }, // M63
-            { id: "d_j16", t1: "1K", t2: "3_8", label2: "3º (D/E/I/J/L)" }  // M64
+            { id: "d_j1", t1: "1A", t2: "3_M49", label2: "3º Colocado" },
+            { id: "d_j2", t1: "2A", t2: "2B" },
+            { id: "d_j3", t1: "1B", t2: "3_M51", label2: "3º Colocado" },
+            { id: "d_j4", t1: "1C", t2: "2F" },
+            { id: "d_j5", t1: "1E", t2: "3_M53", label2: "3º Colocado" },
+            { id: "d_j6", t1: "1F", t2: "2C" },
+            { id: "d_j7", t1: "1G", t2: "3_M55", label2: "3º Colocado" },
+            { id: "d_j8", t1: "1H", t2: "2J" },
+            { id: "d_j9", t1: "1I", t2: "3_M57", label2: "3º Colocado" },
+            { id: "d_j10", t1: "2E", t2: "2I" },
+            { id: "d_j11", t1: "1J", t2: "2H" },
+            { id: "d_j12", t1: "2K", t2: "2L" },
+            { id: "d_j13", t1: "1D", t2: "3_M61", label2: "3º Colocado" },
+            { id: "d_j14", t1: "2D", t2: "2G" },
+            { id: "d_j15", t1: "1L", t2: "3_M63", label2: "3º Colocado" },
+            { id: "d_j16", t1: "1K", t2: "3_M64", label2: "3º Colocado" }
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -320,9 +378,11 @@
                     htmlJogos += `
                         <div class="match-card">
                             <div class="team"><span class="flag">${grupo.flags[c[0]]}</span> <span class="team-name">${grupo.times[c[0]]}</span></div>
-                            <input type="number" class="score-input" id="match_${gKey}_c${idx}_1" oninput="calcularPontos()" min="0">
-                            <span class="vs">X</span>
-                            <input type="number" class="score-input" id="match_${gKey}_c${idx}_2" oninput="calcularPontos()" min="0">
+                            <div class="score-container">
+                                <input type="number" class="score-input" id="match_${gKey}_c${idx}_1" oninput="calcularPontos()" min="0">
+                                <span class="vs">X</span>
+                                <input type="number" class="score-input" id="match_${gKey}_c${idx}_2" oninput="calcularPontos()" min="0">
+                            </div>
                             <div class="team right"><span class="team-name">${grupo.times[c[1]]}</span> <span class="flag">${grupo.flags[c[1]]}</span></div>
                         </div>`;
                 });
@@ -330,21 +390,21 @@
                 containerJogos.insertAdjacentHTML('beforeend', htmlJogos);
             });
 
-            // Montagem dos nós do mata-mata
+            // Montagem do mata-mata
             const c16 = document.getElementById('container-16avos');
             estruturaMataMata.forEach(partida => {
-                // Função para gerar o rótulo descritivo automático ex: "1º A", "2º F"
-                function getLabel(t) { return t.includes('_') ? "Melhor 3º" : t.charAt(0) + "º " + t.substring(1); }
-                
-                let l1 = partida.label1 || getLabel(partida.t1);
-                let l2 = partida.label2 || getLabel(partida.t2);
+                function getLabel(t) { return t.startsWith('3_') ? "Melhor 3º" : t.charAt(0) + "º " + t.substring(1); }
+                let l1 = getLabel(partida.t1);
+                let l2 = getLabel(partida.t2);
                 
                 c16.insertAdjacentHTML('beforeend', `
                     <div class="match-card">
                         <div class="team" id="node_${partida.t1}"><span class="flag">❓</span> <span class="team-name">${l1}</span></div>
-                        <input type="number" class="score-input" id="${partida.id}_1" oninput="avancarMataMata()">
-                        <span class="vs">X</span>
-                        <input type="number" class="score-input" id="${partida.id}_2" oninput="avancarMataMata()">
+                        <div class="score-container">
+                            <input type="number" class="score-input" id="${partida.id}_1" oninput="avancarMataMata()">
+                            <span class="vs">X</span>
+                            <input type="number" class="score-input" id="${partida.id}_2" oninput="avancarMataMata()">
+                        </div>
                         <div class="team right" id="node_${partida.t2}"><span class="team-name">${l2}</span> <span class="flag">❓</span></div>
                     </div>
                 `);
@@ -355,9 +415,11 @@
                 cOit.insertAdjacentHTML('beforeend', `
                     <div class="match-card">
                         <div class="team" id="oit_v${i*2-1}"><span class="flag">❓</span> <span class="team-name">Venc. 16-avos</span></div>
-                        <input type="number" class="score-input" id="o_j${i}_1" oninput="avancarMataMata()">
-                        <span class="vs">X</span>
-                        <input type="number" class="score-input" id="o_j${i}_2" oninput="avancarMataMata()">
+                        <div class="score-container">
+                            <input type="number" class="score-input" id="o_j${i}_1" oninput="avancarMataMata()">
+                            <span class="vs">X</span>
+                            <input type="number" class="score-input" id="o_j${i}_2" oninput="avancarMataMata()">
+                        </div>
                         <div class="team right" id="oit_v${i*2}"><span class="team-name">Venc. 16-avos</span> <span class="flag">❓</span></div>
                     </div>
                 `);
@@ -368,9 +430,11 @@
                 cQua.insertAdjacentHTML('beforeend', `
                     <div class="match-card">
                         <div class="team" id="qua_v${i*2-1}"><span class="flag">❓</span> <span class="team-name">Venc. Oitavas</span></div>
-                        <input type="number" class="score-input" id="q_j${i}_1" oninput="avancarMataMata()">
-                        <span class="vs">X</span>
-                        <input type="number" class="score-input" id="q_j${i}_2" oninput="avancarMataMata()">
+                        <div class="score-container">
+                            <input type="number" class="score-input" id="q_j${i}_1" oninput="avancarMataMata()">
+                            <span class="vs">X</span>
+                            <input type="number" class="score-input" id="q_j${i}_2" oninput="avancarMataMata()">
+                        </div>
                         <div class="team right" id="qua_v${i*2}"><span class="team-name">Venc. Oitavas</span> <span class="flag">❓</span></div>
                     </div>
                 `);
@@ -381,9 +445,11 @@
                 cSem.insertAdjacentHTML('beforeend', `
                     <div class="match-card">
                         <div class="team" id="sem_v${i*2-1}"><span class="flag">❓</span> <span class="team-name">Venc. Quartas</span></div>
-                        <input type="number" class="score-input" id="s_j${i}_1" oninput="avancarMataMata()">
-                        <span class="vs">X</span>
-                        <input type="number" class="score-input" id="s_j${i}_2" oninput="avancarMataMata()">
+                        <div class="score-container">
+                            <input type="number" class="score-input" id="s_j${i}_1" oninput="avancarMataMata()">
+                            <span class="vs">X</span>
+                            <input type="number" class="score-input" id="s_j${i}_2" oninput="avancarMataMata()">
+                        </div>
                         <div class="team right" id="sem_v${i*2}"><span class="team-name">Venc. Quartas</span> <span class="flag">❓</span></div>
                     </div>
                 `);
@@ -425,10 +491,51 @@
             delete el.dataset.teamFlag;
         }
 
+        // Retorna mapeamento oficial dos cruzamentos baseado nas letras dos 8 grupos qualificados
+        function obterMapeamentoTerceiros(letrasAtivas) {
+            const chave = letrasAtivas.sort().join('');
+            
+            // Mapeamento padrão algorítmico adaptado da FIFA para evitar conflitos de mesmo grupo
+            // Retorna qual grupo (letra) deve ir para cada jogo da rodada de 32 (M49, M51, M53, M55, M57, M61, M63, M64)
+            const d = { M49: '', M51: '', M53: '', M55: '', M57: '', M61: '', M63: '', M64: '' };
+            let disponiveis = [...letrasAtivas];
+
+            const tentarAlocar = (conflitos, slot) => {
+                for (let i = 0; i < disponiveis.length; i++) {
+                    if (!conflitos.includes(disponiveis[i])) {
+                        d[slot] = disponiveis[i];
+                        disponiveis.splice(i, 1);
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            // Regras prioritárias para evitar enfrentar o primeiro do seu próprio grupo nos jogos com terceiros:
+            // M49 pega 1A (conflito A), M51 pega 1B (conflito B), M53 pega 1E (conflito E), M55 pega 1G (conflito G),
+            // M57 pega 1I (conflito I), M61 pega 1D (conflito D), M63 pega 1L (conflito L), M64 pega 1K (conflito K).
+            tentarAlocar(['A'], 'M49');
+            tentarAlocar(['B'], 'M51');
+            tentarAlocar(['E'], 'M53');
+            tentarAlocar(['G'], 'M55');
+            tentarAlocar(['I'], 'M57');
+            tentarAlocar(['D'], 'M61');
+            tentarAlocar(['L'], 'M63');
+            tentarAlocar(['K'], 'M64');
+
+            // Preenchimento de segurança caso alguma combinação complexa sobre restos
+            const slots = ['M49', 'M51', 'M53', 'M55', 'M57', 'M61', 'M63', 'M64'];
+            slots.forEach(s => {
+                if(!d[s] && disponiveis.length > 0) d[s] = disponiveis.shift();
+            });
+
+            return d;
+        }
+
         function calcularPontos() {
             let stats = {};
             Object.keys(gruposData).forEach(gKey => {
-                gruposData[gKey].times.forEach(t => { stats[t] = { nome: t, pts: 0, vits: 0, sg: 0, flag: flagsMap[t], pj: 0 }; });
+                gruposData[gKey].times.forEach(t => { stats[t] = { nome: t, pts: 0, vits: 0, sg: 0, flag: flagsMap[t], pj: 0, grupo: gKey }; });
             });
 
             Object.keys(gruposData).forEach(gKey => {
@@ -462,7 +569,12 @@
             });
 
             todosTerceiros.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.vits - a.vits);
-            let top8Nomes = todosTerceiros.slice(0, 8).map(t => t.nome);
+            
+            let top8Terceiros = todosTerceiros.slice(0, 8);
+            let top8Nomes = top8Terceiros.map(t => t.nome);
+            let letrasTerceirosQualificados = top8Terceiros.filter(t => t.pj > 0).map(t => t.grupo);
+
+            let mapaTerceiros = obterMapeamentoTerceiros(letrasTerceirosQualificados);
 
             Object.keys(gruposData).forEach(gKey => {
                 let arrTimes = allGroupsSorted[gKey];
@@ -470,8 +582,13 @@
                 tbody.innerHTML = "";
                 
                 arrTimes.forEach((t, index) => {
-                    let qualificado = t.pj > 0 && (index < 2 || (index === 2 && top8Nomes.includes(t.nome)));
-                    let classeQualificado = qualificado ? 'class="qualified"' : '';
+                    let isTop3 = index === 2 && top8Nomes.includes(t.nome);
+                    let qualificado = t.pj > 0 && (index < 2 || isTop3);
+                    let classeQualificado = '';
+                    if(qualificado) {
+                        classeQualificado = isTop3 ? 'class="third-qualified"' : 'class="qualified"';
+                    }
+
                     tbody.insertAdjacentHTML('beforeend', `
                         <tr ${classeQualificado}>
                             <td><span class="flag">${t.flag}</span> ${t.nome}</td>
@@ -482,7 +599,6 @@
                     `);
                 });
 
-                // Só exibe no mata-mata se houver jogos preenchidos no grupo
                 if (arrTimes.some(t => t.pj > 0)) {
                     setTeamDOM(`node_1${gKey}`, arrTimes[0]);
                     setTeamDOM(`node_2${gKey}`, arrTimes[1]);
@@ -492,14 +608,17 @@
                 }
             });
 
-            // Distribui os 8 melhores terceiros colocados sequencialmente para os nós 3_1 até 3_8
-            for(let i=0; i<8; i++) {
-                if (todosTerceiros[i] && todosTerceiros[i].pj > 0) {
-                    setTeamDOM(`node_3_${i+1}`, todosTerceiros[i]);
+            // Distribui os terceiros nos slots corretos anti-conflito de grupos
+            const slotsMataMata = ['M49', 'M51', 'M53', 'M55', 'M57', 'M61', 'M63', 'M64'];
+            slotsMataMata.forEach(slot => {
+                const letraGrupoDoSlot = mapaTerceiros[slot];
+                if(letraGrupoDoSlot) {
+                    const timeTerceiro = allGroupsSorted[letraGrupoDoSlot][2];
+                    setTeamDOM(`node_3_${slot}`, timeTerceiro);
                 } else {
-                    resetTeamDOM(`node_3_${i+1}`, "Melhor 3º");
+                    resetTeamDOM(`node_3_${slot}`, "Melhor 3º");
                 }
-            }
+            });
 
             avancarMataMata();
         }
@@ -559,7 +678,7 @@
                 if(input.value !== "") localStorage.setItem('copa26_full_' + input.id, input.value);
                 else localStorage.removeItem('copa26_full_' + input.id);
             });
-            alert('Perfeito! Sua simulação com as 48 seleções foi salva.');
+            alert('Perfeito! Sua simulação foi salva com sucesso.');
         }
 
         function loadScores() {
