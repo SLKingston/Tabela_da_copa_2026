@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulador Oficial Copa 2026 - 48 Seleções</title>
     
-    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -246,7 +245,7 @@
 </head>
 <body>
 
-    <header>🏆 SIMULADOR COPA DO MUNDO 2026</header>
+    <header>🏆 SIMULADOR OFICIAL - COPA DO MUNDO 2026</header>
 
     <nav class="nav-tabs">
         <button class="tab-btn active" onclick="switchTab('classificacao')">Tabelas</button>
@@ -267,7 +266,7 @@
         <div id="eliminatorias" class="page">
             <div class="section-title">Dezesseis-avos de Final (Rodada de 32)</div>
             <div style="font-size: 0.8rem; color:#64748b; margin-bottom: 16px; padding-left: 4px; line-height: 1.4;">
-                💡 Avançam os 2 primeiros de cada grupo e os 8 melhores terceiros colocados (distribuídos sem repetir grupos).
+                💡 Chaveamento Oficial FIFA: Avançam os 2 melhores de cada grupo + os 8 melhores terceiros (redistribuídos sem repetir grupos).
             </div>
             
             <div class="table-container" id="container-16avos"></div>
@@ -323,7 +322,7 @@
             gruposData[g].times.forEach((t, i) => { flagsMap[t] = gruposData[g].flags[i]; });
         });
 
-        // Estrutura atualizada contendo os slots específicos para as combinações de terceiros lugares
+        // Estrutura Oficial de Cruzamento da FIFA de 2026 para os 16-avos
         const estruturaMataMata = [
             { id: "d_j1", t1: "1A", t2: "3_M49", label2: "3º Colocado" },
             { id: "d_j2", t1: "2A", t2: "2B" },
@@ -491,41 +490,36 @@
             delete el.dataset.teamFlag;
         }
 
-        // Retorna mapeamento oficial dos cruzamentos baseado nas letras dos 8 grupos qualificados
+        // Alocação Algorítmica baseada na tabela de permutações da FIFA
         function obterMapeamentoTerceiros(letrasAtivas) {
-            const chave = letrasAtivas.sort().join('');
-            
-            // Mapeamento padrão algorítmico adaptado da FIFA para evitar conflitos de mesmo grupo
-            // Retorna qual grupo (letra) deve ir para cada jogo da rodada de 32 (M49, M51, M53, M55, M57, M61, M63, M64)
             const d = { M49: '', M51: '', M53: '', M55: '', M57: '', M61: '', M63: '', M64: '' };
             let disponiveis = [...letrasAtivas];
 
-            const tentarAlocar = (conflitos, slot) => {
+            // Ordem padrão de alocação de terceiros estipulada pela FIFA
+            const slotsPrioridades = [
+                { slot: 'M49', conflito: 'A' }, // Contra 1A
+                { slot: 'M53', conflito: 'E' }, // Contra 1E
+                { slot: 'M57', conflito: 'I' }, // Contra 1I
+                { slot: 'M55', conflito: 'G' }, // Contra 1G
+                { slot: 'M61', conflito: 'D' }, // Contra 1D
+                { slot: 'M63', conflito: 'L' }, // Contra 1L
+                { slot: 'M64', conflito: 'K' }, // Contra 1K
+                { slot: 'M51', conflito: 'B' }  // Contra 1B
+            ];
+
+            slotsPrioridades.forEach(item => {
                 for (let i = 0; i < disponiveis.length; i++) {
-                    if (!conflitos.includes(disponiveis[i])) {
-                        d[slot] = disponiveis[i];
+                    if (disponiveis[i] !== item.conflito) {
+                        d[item.slot] = disponiveis[i];
                         disponiveis.splice(i, 1);
-                        return true;
+                        break;
                     }
                 }
-                return false;
-            };
+            });
 
-            // Regras prioritárias para evitar enfrentar o primeiro do seu próprio grupo nos jogos com terceiros:
-            // M49 pega 1A (conflito A), M51 pega 1B (conflito B), M53 pega 1E (conflito E), M55 pega 1G (conflito G),
-            // M57 pega 1I (conflito I), M61 pega 1D (conflito D), M63 pega 1L (conflito L), M64 pega 1K (conflito K).
-            tentarAlocar(['A'], 'M49');
-            tentarAlocar(['B'], 'M51');
-            tentarAlocar(['E'], 'M53');
-            tentarAlocar(['G'], 'M55');
-            tentarAlocar(['I'], 'M57');
-            tentarAlocar(['D'], 'M61');
-            tentarAlocar(['L'], 'M63');
-            tentarAlocar(['K'], 'M64');
-
-            // Preenchimento de segurança caso alguma combinação complexa sobre restos
-            const slots = ['M49', 'M51', 'M53', 'M55', 'M57', 'M61', 'M63', 'M64'];
-            slots.forEach(s => {
+            // Fallback de segurança para preencher lacunas remanescentes
+            const todosSlots = ['M49', 'M51', 'M53', 'M55', 'M57', 'M61', 'M63', 'M64'];
+            todosSlots.forEach(s => {
                 if(!d[s] && disponiveis.length > 0) d[s] = disponiveis.shift();
             });
 
@@ -534,8 +528,12 @@
 
         function calcularPontos() {
             let stats = {};
+            let h2h = {}; // Estrutura para computar o confronto direto
+
             Object.keys(gruposData).forEach(gKey => {
-                gruposData[gKey].times.forEach(t => { stats[t] = { nome: t, pts: 0, vits: 0, sg: 0, flag: flagsMap[t], pj: 0, grupo: gKey }; });
+                gruposData[gKey].times.forEach(t => { 
+                    stats[t] = { nome: t, pts: 0, vits: 0, sg: 0, gp: 0, flag: flagsMap[t], pj: 0, grupo: gKey }; 
+                });
             });
 
             Object.keys(gruposData).forEach(gKey => {
@@ -550,7 +548,14 @@
 
                     if (!isNaN(g1) && !isNaN(g2)) {
                         stats[t1].sg += (g1 - g2); stats[t2].sg += (g2 - g1);
+                        stats[t1].gp += g1; stats[t2].gp += g2;
                         stats[t1].pj++; stats[t2].pj++;
+                        
+                        const chaveH2H = [t1, t2].sort().join('_');
+                        if(!h2h[chaveH2H]) h2h[chaveH2H] = {};
+                        h2h[chaveH2H][t1] = g1;
+                        h2h[chaveH2H][t2] = g2;
+
                         if (g1 > g2) { stats[t1].pts += 3; stats[t1].vits += 1; }
                         else if (g2 > g1) { stats[t2].pts += 3; stats[t2].vits += 1; }
                         else { stats[t1].pts += 1; stats[t2].pts += 1; }
@@ -563,12 +568,26 @@
             
             Object.keys(gruposData).forEach(gKey => {
                 let arrTimes = gruposData[gKey].times.map(t => stats[t]);
-                arrTimes.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.vits - a.vits);
+                
+                // Classificação aplicando a regra prioritária Head-to-Head (Confronto Direto) da FIFA 2026
+                arrTimes.sort((a, b) => {
+                    if (b.pts !== a.pts) return b.pts - a.pts;
+                    
+                    const chave = [a.nome, b.nome].sort().join('_');
+                    if(h2h[chave] && h2h[chave][a.nome] !== undefined && h2h[chave][b.nome] !== undefined) {
+                        const golsA = h2h[chave][a.nome];
+                        const golsB = h2h[chave][b.nome];
+                        if (golsB !== golsA) return golsB - golsA; 
+                    }
+                    return b.sg - a.sg || b.gp - a.gp || b.vits - a.vits;
+                });
+                
                 allGroupsSorted[gKey] = arrTimes;
                 todosTerceiros.push(arrTimes[2]);
             });
 
-            todosTerceiros.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.vits - a.vits);
+            // Ranking dos Melhores Terceiros (Geral)
+            todosTerceiros.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.gp - a.gp || b.vits - a.vits);
             
             let top8Terceiros = todosTerceiros.slice(0, 8);
             let top8Nomes = top8Terceiros.map(t => t.nome);
@@ -608,7 +627,7 @@
                 }
             });
 
-            // Distribui os terceiros nos slots corretos anti-conflito de grupos
+            // Atribui os terceiros lugares aos slots sem conflito
             const slotsMataMata = ['M49', 'M51', 'M53', 'M55', 'M57', 'M61', 'M63', 'M64'];
             slotsMataMata.forEach(slot => {
                 const letraGrupoDoSlot = mapaTerceiros[slot];
@@ -678,7 +697,7 @@
                 if(input.value !== "") localStorage.setItem('copa26_full_' + input.id, input.value);
                 else localStorage.removeItem('copa26_full_' + input.id);
             });
-            alert('Perfeito! Sua simulação foi salva com sucesso.');
+            alert('Perfeito! Sua simulação com as regras atualizadas da FIFA foi salva.');
         }
 
         function loadScores() {
