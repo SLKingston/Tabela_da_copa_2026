@@ -2,8 +2,11 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mata-Mata Oficial - Copa do Mundo 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#090d16">
+    <title>Copa 2026 - Simulador</title>
     <style>
         :root {
             --primary: #0b0f19;
@@ -19,93 +22,140 @@
             --penalty-color: #f43f5e;
         }
 
-        * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        /* Reset para Mobile (Evita scroll esquisito e seleção de texto) */
+        * { 
+            box-sizing: border-box; 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
         body {
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 10px 0 20px 0;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
         }
 
         header {
             text-align: center;
-            margin-bottom: 40px;
-            padding: 10px;
+            padding: 10px 20px;
+            margin-bottom: 10px;
         }
 
         header h1 {
             color: #ffffff;
-            font-size: 2.2rem;
+            font-size: 1.6rem;
             font-weight: 800;
-            margin: 0 0 8px 0;
-            letter-spacing: -0.5px;
+            margin: 0 0 4px 0;
             background: linear-gradient(to right, #ffffff, #93c5fd);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        header p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+        header p { margin: 0; color: var(--text-muted); font-size: 0.85rem; }
 
-        /* Container da árvore de jogos */
+        /* Barra de Ações Fixa/Destaque */
+        .action-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(9, 13, 22, 0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+        }
+
+        .btn {
+            flex: 1;
+            max-width: 160px;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+        }
+
+        .btn-save {
+            background: var(--accent);
+            color: #ffffff;
+        }
+        .btn-save:active { background: #1d4ed8; transform: scale(0.98); }
+
+        .btn-clear {
+            background: #27121b;
+            color: var(--penalty-color);
+            border: 1px solid #741b3a;
+        }
+        .btn-clear:active { background: #3f1221; transform: scale(0.98); }
+
+        /* Container de Chaves Otimizado para Mobile */
         .bracket-container {
             display: flex;
-            gap: 40px;
+            gap: 20px;
             overflow-x: auto;
-            padding: 20px 20px 40px 20px;
+            padding: 20px;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
+            /* Melhora a rolagem no mobile, agindo como slides */
+            scroll-snap-type: x mandatory; 
         }
+
+        /* Remove barras de rolagem feias no Android/iOS, mantendo a função */
+        .bracket-container::-webkit-scrollbar { display: none; }
 
         .round {
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
-            min-width: 300px;
+            justify-content: flex-start;
+            min-width: 285px;
+            max-width: 285px;
             flex-shrink: 0;
-            position: relative;
+            scroll-snap-align: center;
         }
 
         .round-title {
             text-align: center;
             font-weight: 700;
             color: #ffffff;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 1.5px;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
             background: rgba(37, 99, 235, 0.1);
             border: 1px solid rgba(37, 99, 235, 0.2);
             padding: 8px 12px;
             border-radius: 20px;
         }
 
-        /* Estilização dos Cards de Jogos */
+        /* Cards de Jogos Ajustados */
         .match-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
-            margin: 15px 0;
-            padding: 14px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            position: relative;
-            transition: all 0.25s ease;
-        }
-
-        .match-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--accent);
-            box-shadow: 0 0 15px var(--accent-glow);
-            background: var(--card-hover);
+            margin-bottom: 15px;
+            padding: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
         }
 
         .match-id {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-muted);
             font-weight: 700;
-            margin-bottom: 10px;
-            letter-spacing: 0.5px;
+            margin-bottom: 8px;
         }
 
         .team-row {
@@ -113,21 +163,19 @@
             align-items: center;
             justify-content: space-between;
             margin: 6px 0;
-            padding: 4px 0;
         }
 
         .team-info {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 0.95rem;
+            gap: 8px;
+            font-size: 0.9rem;
             font-weight: 600;
-            width: 60%;
+            width: 65%;
         }
 
         .flag {
-            font-size: 1.35rem;
-            display: inline-block;
+            font-size: 1.2rem;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
         }
 
@@ -138,16 +186,16 @@
             color: #e2e8f0;
         }
 
-        /* Inputs de Pontuação */
         .score-box {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
 
+        /* Fonte 16px impede o iOS de dar zoom in automático indesejado */
         .score-input {
             width: 38px;
-            height: 34px;
+            height: 36px;
             text-align: center;
             font-size: 1.1rem;
             font-weight: 800;
@@ -156,21 +204,15 @@
             color: #ffffff;
             border-radius: 6px;
             outline: none;
-            transition: border-color 0.2s;
             -moz-appearance: textfield;
         }
         .score-input::-webkit-outer-spin-button, .score-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-        .score-input:focus {
-            border-color: var(--accent);
-        }
-
-        /* Inputs de Pênaltis */
         .penalty-input {
             width: 30px;
-            height: 28px;
+            height: 30px;
             text-align: center;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 800;
             background: #27121b;
             border: 1px solid #741b3a;
@@ -181,71 +223,68 @@
         }
 
         .penalty-label {
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             color: var(--penalty-color);
             font-weight: 800;
             letter-spacing: 1px;
             margin: 2px 0;
             display: none;
             text-align: right;
-            padding-right: 5px;
+            padding-right: 4px;
         }
 
-        /* Estados de Vencedor */
         .winner .team-name { color: var(--winner-color); }
         .winner .score-input { border-color: var(--winner-color); color: var(--winner-color); }
 
-        /* Estilização para o Card da Grande Final */
+        /* Estilização Destacada para a Final */
         #r2 .match-card {
-            border: 2px solid #ea580c;
+            border: 1.5px solid #ea580c;
             background: linear-gradient(135deg, var(--card-bg) 0%, #2e170c 100%);
         }
-        #r2 .match-card:hover {
-            box-shadow: 0 0 20px rgba(234, 88, 12, 0.4);
-            border-color: #f97316;
+        #r2 .round-title { background: rgba(234, 88, 12, 0.1); border-color: rgba(234, 88, 12, 0.3); }
+
+        /* Notificação visual de salvo */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
         }
-        #r2 .round-title {
-            background: rgba(234, 88, 12, 0.1);
-            border-color: rgba(234, 88, 12, 0.3);
-        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🏆 MATA-MATA • COPA DO MUNDO 2026</h1>
-        <p>Preencha os placares. Em caso de empate, a decisão por pênaltis surgirá automaticamente.</p>
+        <h1>🏆 MATA-MATA • COPA 2026</h1>
+        <p>Arraste para o lado para ver as próximas fases</p>
     </header>
 
-    <div class="bracket-container">
-        <!-- 16-AVOS -->
-        <div class="round" id="r32">
-            <div class="round-title">16-avos de Final</div>
-        </div>
-
-        <!-- OITAVAS -->
-        <div class="round" id="r16">
-            <div class="round-title">Oitavas de Final</div>
-        </div>
-
-        <!-- QUARTAS -->
-        <div class="round" id="r8">
-            <div class="round-title">Quartas de Final</div>
-        </div>
-
-        <!-- SEMIFINAIS -->
-        <div class="round" id="r4">
-            <div class="round-title">Semifinais</div>
-        </div>
-
-        <!-- FINAL -->
-        <div class="round" id="r2">
-            <div class="round-title">Grande Final</div>
-        </div>
+    <div class="action-bar">
+        <button class="btn btn-clear" onclick="limparTudo()">🗑️ Limpar</button>
+        <button class="btn btn-save" onclick="salvarSimulacao()">💾 Salvar</button>
     </div>
 
+    <div class="bracket-container" id="master-container">
+        <div class="round" id="r32"><div class="round-title">16-avos de Final</div></div>
+        <div class="round" id="r16"><div class="round-title">Oitavas de Final</div></div>
+        <div class="round" id="r8"><div class="round-title">Quartas de Final</div></div>
+        <div class="round" id="r4"><div class="round-title">Semifinais</div></div>
+        <div class="round" id="r2"><div class="round-title">Grande Final</div></div>
+    </div>
+
+    <div class="toast" id="toast">Simulação Salva! ⚽</div>
+
     <script>
-        // Mapeamento de bandeiras das seleções oficiais
         const bandeiras = {
             "Alemanha": "🇩🇪", "Paraguai": "🇵🇾", "França": "🇫🇷", "Suécia": "🇸🇪",
             "África do Sul": "🇿🇦", "Canadá": "🇨🇦", "Holanda": "🇳🇱", "Marrocos": "🇲🇦",
@@ -258,22 +297,14 @@
         };
 
         const jogosIniciais = [
-            { id: "M49", t1: "Alemanha", t2: "Paraguai" },
-            { id: "M50", t1: "França", t2: "Suécia" },
-            { id: "M51", t1: "África do Sul", t2: "Canadá" },
-            { id: "M52", t1: "Holanda", t2: "Marrocos" },
-            { id: "M53", t1: "Portugal", t2: "Croácia" },
-            { id: "M54", t1: "Espanha", t2: "Áustria" },
-            { id: "M55", t1: "Estados Unidos", t2: "Bósnia e Herz." },
-            { id: "M56", t1: "Bélgica", t2: "Senegal" },
-            { id: "M57", t1: "Brasil", t2: "Japão" },
-            { id: "M58", t1: "Costa do Marfim", t2: "Noruega" },
-            { id: "M59", t1: "México", t2: "Equador" },
-            { id: "M60", t1: "Inglaterra", t2: "RD Congo" },
-            { id: "M61", t1: "Argentina", t2: "Cabo Verde" },
-            { id: "M62", t1: "Austrália", t2: "Egito" },
-            { id: "M63", t1: "Suíça", t2: "Argélia" },
-            { id: "M64", t1: "Colômbia", t2: "Gana" }
+            { id: "M49", t1: "Alemanha", t2: "Paraguai" }, { id: "M50", t1: "França", t2: "Suécia" },
+            { id: "M51", t1: "África do Sul", t2: "Canadá" }, { id: "M52", t1: "Holanda", t2: "Marrocos" },
+            { id: "M53", t1: "Portugal", t2: "Croácia" }, { id: "M54", t1: "Espanha", t2: "Áustria" },
+            { id: "M55", t1: "Estados Unidos", t2: "Bósnia e Herz." }, { id: "M56", t1: "Bélgica", t2: "Senegal" },
+            { id: "M57", t1: "Brasil", t2: "Japão" }, { id: "M58", t1: "Costa do Marfim", t2: "Noruega" },
+            { id: "M59", t1: "México", t2: "Equador" }, { id: "M60", t1: "Inglaterra", t2: "RD Congo" },
+            { id: "M61", t1: "Argentina", t2: "Cabo Verde" }, { id: "M62", t1: "Austrália", t2: "Egito" },
+            { id: "M63", t1: "Suíça", t2: "Argélia" }, { id: "M64", t1: "Colômbia", t2: "Gana" }
         ];
 
         const caminhos = {
@@ -281,18 +312,13 @@
             "M67": { p1: "M53", p2: "M54" }, "M68": { p1: "M55", p2: "M56" },
             "M69": { p1: "M57", p2: "M58" }, "M70": { p1: "M59", p2: "M60" },
             "M71": { p1: "M61", p2: "M62" }, "M72": { p1: "M63", p2: "M64" },
-            
             "M73": { p1: "M65", p2: "M66" }, "M74": { p1: "M67", p2: "M68" },
             "M75": { p1: "M69", p2: "M70" }, "M76": { p1: "M71", p2: "M72" },
-            
             "M77": { p1: "M73", p2: "M74" }, "M78": { p1: "M75", p2: "M76" },
-            
             "M80": { p1: "M77", p2: "M78" }
         };
 
-        function obterBandeira(nomeTime) {
-            return bandeiras[nomeTime] || "🏳️";
-        }
+        function obterBandeira(nomeTime) { return bandeiras[nomeTime] || "🏳️"; }
 
         function criarCardJogo(id, time1, time2) {
             return `
@@ -304,8 +330,8 @@
                             <span class="team-name" id="${id}_t1_name">${time1}</span>
                         </div>
                         <div class="score-box">
-                            <input type="number" class="penalty-input" id="${id}_p1" min="0" placeholder="P" oninput="atualizarTorneio()">
-                            <input type="number" class="score-input" id="${id}_s1" min="0" oninput="atualizarTorneio()">
+                            <input type="number" inputmode="numeric" class="penalty-input" id="${id}_p1" min="0" placeholder="P" oninput="atualizarTorneio()">
+                            <input type="number" inputmode="numeric" class="score-input" id="${id}_s1" min="0" oninput="atualizarTorneio()">
                         </div>
                     </div>
                     <div class="penalty-label" id="${id}_pen_lbl">PÊNALTIS</div>
@@ -315,8 +341,8 @@
                             <span class="team-name" id="${id}_t2_name">${time2}</span>
                         </div>
                         <div class="score-box">
-                            <input type="number" class="penalty-input" id="${id}_p2" min="0" placeholder="P" oninput="atualizarTorneio()">
-                            <input type="number" class="score-input" id="${id}_s2" min="0" oninput="atualizarTorneio()">
+                            <input type="number" inputmode="numeric" class="penalty-input" id="${id}_p2" min="0" placeholder="P" oninput="atualizarTorneio()">
+                            <input type="number" inputmode="numeric" class="score-input" id="${id}_s2" min="0" oninput="atualizarTorneio()">
                         </div>
                     </div>
                 </div>`;
@@ -336,6 +362,8 @@
             for(let i=77; i<=78; i++) r4.insertAdjacentHTML('beforeend', criarCardJogo(`M${i}`, `Venc. M${caminhos["M"+i].p1}`, `Venc. M${caminhos["M"+i].p2}`));
 
             document.getElementById('r2').insertAdjacentHTML('beforeend', criarCardJogo("M80", "Venc. M77", "Venc. M78"));
+
+            carregarSimulacao();
         });
 
         function determinarVencedor(id) {
@@ -344,7 +372,6 @@
             const p1Input = document.getElementById(`${id}_p1`);
             const p2Input = document.getElementById(`${id}_p2`);
             const penLbl = document.getElementById(`${id}_pen_lbl`);
-            
             const r1 = document.getElementById(`${id}_row1`);
             const r2 = document.getElementById(`${id}_row2`);
             
@@ -390,6 +417,42 @@
                 else { t2Label.innerText = `Venc. ${dep.p2}`; f2Label.innerText = "❓"; }
             });
             determinarVencedor("M80");
+        }
+
+        /* Funções de Salvamento e Persistência de Dados */
+        function salvarSimulacao() {
+            const dados = {};
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                if(input.value !== "") dados[input.id] = input.value;
+            });
+            localStorage.setItem('simulacao_copa_2026', JSON.stringify(dados));
+            
+            // Mostrar Toast Informativo
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function carregarSimulacao() {
+            const dadosSalvos = localStorage.getItem('simulacao_copa_2026');
+            if (dadosSalvos) {
+                const dados = JSON.parse(dadosSalvos);
+                Object.keys(dados).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = dados[id];
+                });
+                atualizarTorneio();
+            }
+        }
+
+        function limparTudo() {
+            if(confirm("Tem certeza que deseja apagar todos os placares inseridos?")) {
+                const inputs = document.querySelectorAll('input[type="number"]');
+                inputs.forEach(input => input.value = "");
+                localStorage.removeItem('simulacao_copa_2026');
+                atualizarTorneio();
+            }
         }
     </script>
 </body>
