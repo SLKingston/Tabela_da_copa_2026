@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mata-Mata Oficial - Copa do Mundo 2026</title>
+    <style>
+        :root {
+            --primary: #0b0f19;
+            --bg: #090d16;
+            --card-bg: #131c2e;
+            --card-hover: #1b273f;
+            --accent: #2563eb;
+            --accent-glow: rgba(37, 99, 235, 0.4);
+            --text-main: #f1f5f9;
+            --text-muted: #64748b;
+            --border: #1e293b;
+            --winner-color: #10b981;
+            --penalty-color: #f43f5e;
+        }
+
+        * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 10px;
+        }
+
+        header h1 {
+            color: #ffffff;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+
+        /* Container da árvore de jogos */
+        .bracket-container {
+            display: flex;
+            gap: 40px;
+            overflow-x: auto;
+            padding: 20px 20px 40px 20px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .round {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            min-width: 300px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .round-title {
+            text-align: center;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1.5px;
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            padding: 8px 12px;
+            border-radius: 20px;
+        }
+
+        /* Estilização dos Cards de Jogos */
+        .match-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin: 15px 0;
+            padding: 14px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: all 0.25s ease;
+        }
+
+        .match-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+            background: var(--card-hover);
+        }
+
+        .match-id {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .team-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 6px 0;
+            padding: 4px 0;
+        }
+
+        .team-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            width: 60%;
+        }
+
+        .flag {
+            font-size: 1.35rem;
+            display: inline-block;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .team-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #e2e8f0;
+        }
+
+        /* Inputs de Pontuação */
+        .score-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .score-input {
+            width: 38px;
+            height: 34px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 800;
+            background: var(--primary);
+            border: 1px solid var(--border);
+            color: #ffffff;
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.2s;
+            -moz-appearance: textfield;
+        }
+        .score-input::-webkit-outer-spin-button, .score-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .score-input:focus {
+            border-color: var(--accent);
+        }
+
+        /* Inputs de Pênaltis */
+        .penalty-input {
+            width: 30px;
+            height: 28px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            background: #27121b;
+            border: 1px solid #741b3a;
+            color: var(--penalty-color);
+            border-radius: 4px;
+            outline: none;
+            display: none;
+        }
+
+        .penalty-label {
+            font-size: 0.6rem;
+            color: var(--penalty-color);
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin: 2px 0;
+            display: none;
+            text-align: right;
+            padding-right: 5px;
+        }
+
+        /* Estados de Vencedor */
+        .winner .team-name { color: var(--winner-color); }
+        .winner .score-input { border-color: var(--winner-color); color: var(--winner-color); }
+
+        /* Estilização para o Card da Grande Final */
+        #r2 .match-card {
+            border: 2px solid #ea580c;
+            background: linear-gradient(135deg, var(--card-bg) 0%, #2e170c 100%);
+        }
+        #r2 .match-card:hover {
+            box-shadow: 0 0 20px rgba(234, 88, 12, 0.4);
+            border-color: #f97316;
+        }
+        #r2 .round-title {
+            background: rgba(234, 88, 12, 0.1);
+            border-color: rgba(234, 88, 12, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏆 MATA-MATA • COPA DO MUNDO 2026</h1>
+        <p>Preencha os placares. Em caso de empate, a decisão por pênaltis surgirá automaticamente.</p>
+    </header>
+
+    <div class="bracket-container">
+        <!-- 16-AVOS -->
+        <div class="round" id="r32">
+            <div class="round-title">16-avos de Final</div>
+        </div>
+
+        <!-- OITAVAS -->
+        <div class="round" id="r16">
+            <div class="round-title">Oitavas de Final</div>
+        </div>
+
+        <!-- QUARTAS -->
+        <div class="round" id="r8">
+            <div class="round-title">Quartas de Final</div>
+        </div>
+
+        <!-- SEMIFINAIS -->
+        <div class="round" id="r4">
+            <div class="round-title">Semifinais</div>
+        </div>
+
+        <!-- FINAL -->
+        <div class="round" id="r2">
+            <div class="round-title">Grande Final</div>
+        </div>
+    </div>
+
+    <script>
+        // Mapeamento de bandeiras das seleções oficiais
+        const bandeiras = {
+            "Alemanha": "🇩🇪", "Paraguai": "🇵🇾", "França": "🇫🇷", "Suécia": "🇸🇪",
+            "África do Sul": "🇿🇦", "Canadá": "🇨🇦", "Holanda": "🇳🇱", "Marrocos": "🇲🇦",
+            "Portugal": "🇵🇹", "Croácia": "🇭🇷", "Espanha": "🇪🇸", "Áustria": "🇦🇹",
+            "Estados Unidos": "🇺🇸", "Bósnia e Herz.": "🇧🇦", "Bélgica": "🇧🇪", "Senegal": "🇸🇳",
+            "Brasil": "🇧🇷", "Japão": "🇯🇵", "Costa do Marfim": "🇨🇮", "Noruega": "🇳🇴",
+            "México": "🇲🇽", "Equador": "🇪🇨", "Inglaterra": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "RD Congo": "🇨🇩",
+            "Argentina": "🇦🇷", "Cabo Verde": "🇨🇻", "Austrália": "🇦🇺", "Egito": "🇪🇬",
+            "Suíça": "🇨🇭", "Argélia": "🇩🇿", "Colômbia": "🇨🇴", "Gana": "🇬🇭", "❓": "🏳️"
+        };
+
+        const jogosIniciais = [
+            { id: "M49", t1: "Alemanha", t2: "Paraguai" },
+            { id: "M50", t1: "França", t2: "Suécia" },
+            { id: "M51", t1: "África do Sul", t2: "Canadá" },
+            { id: "M52", t1: "Holanda", t2: "Marrocos" },
+            { id: "M53", t1: "Portugal", t2: "Croácia" },
+            { id: "M54", t1: "Espanha", t2: "Áustria" },
+            { id: "M55", t1: "Estados Unidos", t2: "Bósnia e Herz." },
+            { id: "M56", t1: "Bélgica", t2: "Senegal" },
+            { id: "M57", t1: "Brasil", t2: "Japão" },
+            { id: "M58", t1: "Costa do Marfim", t2: "Noruega" },
+            { id: "M59", t1: "México", t2: "Equador" },
+            { id: "M60", t1: "Inglaterra", t2: "RD Congo" },
+            { id: "M61", t1: "Argentina", t2: "Cabo Verde" },
+            { id: "M62", t1: "Austrália", t2: "Egito" },
+            { id: "M63", t1: "Suíça", t2: "Argélia" },
+            { id: "M64", t1: "Colômbia", t2: "Gana" }
+        ];
+
+        const caminhos = {
+            "M65": { p1: "M49", p2: "M50" }, "M66": { p1: "M51", p2: "M52" },
+            "M67": { p1: "M53", p2: "M54" }, "M68": { p1: "M55", p2: "M56" },
+            "M69": { p1: "M57", p2: "M58" }, "M70": { p1: "M59", p2: "M60" },
+            "M71": { p1: "M61", p2: "M62" }, "M72": { p1: "M63", p2: "M64" },
+            
+            "M73": { p1: "M65", p2: "M66" }, "M74": { p1: "M67", p2: "M68" },
+            "M75": { p1: "M69", p2: "M70" }, "M76": { p1: "M71", p2: "M72" },
+            
+            "M77": { p1: "M73", p2: "M74" }, "M78": { p1: "M75", p2: "M76" },
+            
+            "M80": { p1: "M77", p2: "M78" }
+        };
+
+        function obterBandeira(nomeTime) {
+            return bandeiras[nomeTime] || "🏳️";
+        }
+
+        function criarCardJogo(id, time1, time2) {
+            return `
+                <div class="match-card" id="card_${id}">
+                    <div class="match-id">${id}</div>
+                    <div class="team-row" id="${id}_row1">
+                        <div class="team-info">
+                            <span class="flag" id="${id}_t1_flag">${obterBandeira(time1)}</span>
+                            <span class="team-name" id="${id}_t1_name">${time1}</span>
+                        </div>
+                        <div class="score-box">
+                            <input type="number" class="penalty-input" id="${id}_p1" min="0" placeholder="P" oninput="atualizarTorneio()">
+                            <input type="number" class="score-input" id="${id}_s1" min="0" oninput="atualizarTorneio()">
+                        </div>
+                    </div>
+                    <div class="penalty-label" id="${id}_pen_lbl">PÊNALTIS</div>
+                    <div class="team-row" id="${id}_row2">
+                        <div class="team-info">
+                            <span class="flag" id="${id}_t2_flag">${obterBandeira(time2)}</span>
+                            <span class="team-name" id="${id}_t2_name">${time2}</span>
+                        </div>
+                        <div class="score-box">
+                            <input type="number" class="penalty-input" id="${id}_p2" min="0" placeholder="P" oninput="atualizarTorneio()">
+                            <input type="number" class="score-input" id="${id}_s2" min="0" oninput="atualizarTorneio()">
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const r32 = document.getElementById('r32');
+            jogosIniciais.forEach(j => r32.insertAdjacentHTML('beforeend', criarCardJogo(j.id, j.t1, j.t2)));
+
+            const r16 = document.getElementById('r16');
+            for(let i=65; i<=72; i++) r16.insertAdjacentHTML('beforeend', criarCardJogo(`M${i}`, `Venc. M${caminhos["M"+i].p1}`, `Venc. M${caminhos["M"+i].p2}`));
+
+            const r8 = document.getElementById('r8');
+            for(let i=73; i<=76; i++) r8.insertAdjacentHTML('beforeend', criarCardJogo(`M${i}`, `Venc. M${caminhos["M"+i].p1}`, `Venc. M${caminhos["M"+i].p2}`));
+
+            const r4 = document.getElementById('r4');
+            for(let i=77; i<=78; i++) r4.insertAdjacentHTML('beforeend', criarCardJogo(`M${i}`, `Venc. M${caminhos["M"+i].p1}`, `Venc. M${caminhos["M"+i].p2}`));
+
+            document.getElementById('r2').insertAdjacentHTML('beforeend', criarCardJogo("M80", "Venc. M77", "Venc. M78"));
+        });
+
+        function determinarVencedor(id) {
+            const s1 = parseInt(document.getElementById(`${id}_s1`).value);
+            const s2 = parseInt(document.getElementById(`${id}_s2`).value);
+            const p1Input = document.getElementById(`${id}_p1`);
+            const p2Input = document.getElementById(`${id}_p2`);
+            const penLbl = document.getElementById(`${id}_pen_lbl`);
+            
+            const r1 = document.getElementById(`${id}_row1`);
+            const r2 = document.getElementById(`${id}_row2`);
+            
+            r1.classList.remove('winner'); r2.classList.remove('winner');
+
+            if (isNaN(s1) || isNaN(s2)) {
+                p1Input.style.display = 'none'; p2Input.style.display = 'none'; penLbl.style.display = 'none';
+                return null;
+            }
+
+            if (s1 === s2) {
+                p1Input.style.display = 'block'; p2Input.style.display = 'block'; penLbl.style.display = 'block';
+                const p1 = parseInt(p1Input.value);
+                const p2 = parseInt(p2Input.value);
+
+                if(!isNaN(p1) && !isNaN(p2) && p1 !== p2) {
+                    if (p1 > p2) { r1.classList.add('winner'); return document.getElementById(`${id}_t1_name`).innerText; }
+                    else { r2.classList.add('winner'); return document.getElementById(`${id}_t2_name`).innerText; }
+                }
+                return null;
+            } else {
+                p1Input.style.display = 'none'; p2Input.style.display = 'none'; penLbl.style.display = 'none';
+                if (s1 > s2) { r1.classList.add('winner'); return document.getElementById(`${id}_t1_name`).innerText; }
+                else { r2.classList.add('winner'); return document.getElementById(`${id}_t2_name`).innerText; }
+            }
+        }
+
+        function atualizarTorneio() {
+            Object.keys(caminhos).forEach(idAlvo => {
+                const dep = caminhos[idAlvo];
+                const v1 = determinarVencedor(dep.p1);
+                const v2 = determinarVencedor(dep.p2);
+
+                const t1Label = document.getElementById(`${idAlvo}_t1_name`);
+                const t2Label = document.getElementById(`${idAlvo}_t2_name`);
+                const f1Label = document.getElementById(`${idAlvo}_t1_flag`);
+                const f2Label = document.getElementById(`${idAlvo}_t2_flag`);
+
+                if (v1) { t1Label.innerText = v1; f1Label.innerText = obterBandeira(v1); } 
+                else { t1Label.innerText = `Venc. ${dep.p1}`; f1Label.innerText = "❓"; }
+
+                if (v2) { t2Label.innerText = v2; f2Label.innerText = obterBandeira(v2); } 
+                else { t2Label.innerText = `Venc. ${dep.p2}`; f2Label.innerText = "❓"; }
+            });
+            determinarVencedor("M80");
+        }
+    </script>
+</body>
+</html>
